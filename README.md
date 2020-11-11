@@ -4,7 +4,7 @@ Prerequisite:
 2) Also need to create a role for which this gitlab repo CI job will be running  
 3) Need to associate a policy to this particular role so that it has right permissions  
 
-`
+```
 vault write auth/cdp/role/<project_id> - <<EOF
   {
     "role_type": "jwt",
@@ -16,4 +16,4 @@ vault write auth/cdp/role/<project_id> - <<EOF
   }
 }
 EOF
-`
+```
