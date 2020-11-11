@@ -1,0 +1,51 @@
+include:
+  - project: 'tmobile/templates'
+    ref: tmo/master
+    file: 'gitlab-ci/.tmo.global.common.gitlab-ci.yml'
+
+
+image:
+  name: hashicorp/terraform:light
+  entrypoint:
+    - '/usr/bin/env'
+    - 'PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
+
+before_script:
+  - rm -rf .terraform
+  # check terraform version 
+  - terraform --version
+  # check the gitlab vars
+  - echo $CI_JOB_JWT
+  - echo $CI_PROJECT_ID
+  # assign terraform var from env var
+  - export TF_VAR_ci_jwt=$CI_JOB_JWT && echo $TF_VAR_ci_jwt
+  - export TF_VAR_ci_role=$CI_PROJECT_ID && echo $TF_VAR_ci_role
+  - terraform init
+
+stages:
+  - validate
+  - plan
+  - apply
+
+validate:
+  stage: validate
+  script:
+    - terraform validate
+
+plan:
+  stage: plan
+  script:
+    - terraform plan -out "planfile"
+  dependencies:
+    - validate
+  artifacts:
+    paths:
+      - planfile
+
+apply:
+  stage: apply
+  script:
+    - terraform apply -input=false "planfile"
+  dependencies:
+    - plan
+  when: manual
