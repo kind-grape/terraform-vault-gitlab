@@ -1,9 +1,3 @@
-include:
-  - project: 'tmobile/templates'
-    ref: tmo/master
-    file: 'gitlab-ci/.tmo.global.common.gitlab-ci.yml'
-
-
 image:
   name: hashicorp/terraform:light
   entrypoint:
@@ -12,20 +6,35 @@ image:
 
 before_script:
   - rm -rf .terraform
-  # check terraform version 
+  # check tf version
   - terraform --version
-  # check the gitlab vars
-  - echo $CI_JOB_JWT
-  - echo $CI_PROJECT_ID
-  # assign terraform var from env var
+  # init terraform
+  - terraform init
+  # tf vars
   - export TF_VAR_ci_jwt=$CI_JOB_JWT && echo $TF_VAR_ci_jwt
   - export TF_VAR_ci_role=$CI_PROJECT_ID && echo $TF_VAR_ci_role
-  - terraform init
 
 stages:
+  - pre-flight
   - validate
   - plan
   - apply
+
+pre-flight:
+  stage: pre-flight
+  script:
+    # check the gitlab vars
+    - echo $CI_JOB_JWT
+    - echo $CI_PROJECT_ID
+    # assign terraform var from env var
+    - export TF_VAR_ci_jwt=$CI_JOB_JWT && echo $TF_VAR_ci_jwt
+    - export TF_VAR_ci_role=$CI_PROJECT_ID && echo $TF_VAR_ci_role
+    #- echo "TF_VAR_ci_jwt=$CI_JOB_JWT" >> vault_tf.env
+    #- echo "TF_VAR_ci_role=$CI_PROJECT_ID" >> vault_tf.env
+    #- cat vault_tf.env
+  #artifacts:
+  #  reports:
+  #    dotenv: vault_tf.env
 
 validate:
   stage: validate
@@ -35,6 +44,7 @@ validate:
 plan:
   stage: plan
   script:
+    - echo $TF_VAR_ci_jwt && echo $TF_VAR_ci_role
     - terraform plan -out "planfile"
   dependencies:
     - validate

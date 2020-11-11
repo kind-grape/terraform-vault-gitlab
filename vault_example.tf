@@ -29,7 +29,7 @@ provider "vault" {
 }
 
 resource "vault_generic_secret" "example" {
-  path = "secret/vault_tf_gitlab_demo"
+  path = "admin/vault_tf_gitlab_demo"
 
   data_json = <<EOT
 {

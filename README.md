@@ -17,3 +17,12 @@ vault write auth/cdp/role/<project_id> - <<EOF
 }
 EOF
 ```
+Following gitlab var would need to be setup. Currently it's set as gitlab CI var
+```
+VAULT_ADDR='https://vault-dev.npe-services.t-mobile.com'
+# skip tf vault provider tls check
+VAULT_SKIP_VERIFY=1
+```
+## Need to be improved
+Currently no state backend defined, relying gitlab runner in mem state (flushes after each run)
+So could not keep state data. Would need to use remote state if drift-detection is required
